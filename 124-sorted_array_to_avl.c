@@ -1,88 +1,65 @@
 #include "binary_trees.h"
 
 /**
- * sorted_array_to_avl - create an AVL tree from a sorted array
- * @array: sorted array
- * @size: size of array
+ * create_tree - creates an AVL tree with recursion
  *
- * Return: pointer to root of AVL tree or NULL
+ * @node: pointer node
+ * @array: input array of integers
+ * @size: size of array
+ * @mode: 1 to adding on the left, 2 to adding on the right
+ * Return: no return
  */
+
+void create_tree(avl_t **node, int *array, size_t size, int mode)
+{
+	size_t middle;
+
+	if (size == 0)
+		return;
+
+	middle = (size / 2);
+	middle = (size % 2 == 0) ? middle - 1 : middle;
+
+	if (mode == 1)
+	{
+		(*node)->left = binary_tree_node(*node, array[middle]);
+		create_tree(&((*node)->left), array, middle, 1);
+		create_tree(&((*node)->left), array + middle + 1, (size - 1 - middle), 2);
+	}
+	else
+	{
+		(*node)->right = binary_tree_node(*node, array[middle]);
+		create_tree(&((*node)->right), array, middle, 1);
+		create_tree(&((*node)->right), array + middle + 1, (size - 1 - middle), 2);
+	}
+}
+
+/**
+ * sorted_array_to_avl - creates root node and calls to create_tree
+ *
+ * @array: input array of integers
+ * @size: size of array
+ * Return: pointer to the root
+ */
+
 avl_t *sorted_array_to_avl(int *array, size_t size)
 {
-	avl_t *tree;
+	avl_t *root;
+	size_t middle;
 
-	if (array == NULL || size == 0)
+	root = NULL;
+
+	if (size == 0)
 		return (NULL);
-	tree = NULL;
-	return (create_avl(array, &tree, 0, size - 1));
-}
 
-/**
- * create_avl - creates an AVL tree from a sorted array
- * @array: sorted array
- * @tree: double pointer to root of tree
- * @start: start of array
- * @end: end of array
- *
- * Return: pointer to root of AVL tree or NULL
- */
-avl_t *create_avl(int *array, avl_t **tree, size_t start, size_t end)
-{
-	size_t mid;
+	middle = (size / 2);
 
-	if (tree == NULL)
-		return (NULL);
-	if (start > end)
-		return (*tree);
-	if (start == end)
-	{
-		if (*tree == NULL)
-			*tree = avl_insert(tree, array[start]);
-		else
-			avl_insert(tree, array[start]);
-		return (*tree);
-	}
+	middle = (size % 2 == 0) ? middle - 1 : middle;
 
-	mid = (end - start) / 2 + start;
-	avl_insert(tree, array[mid]);
-	create_avl(array, tree, start, mid - 1);
-	create_avl(array, tree, mid + 1, end);
-	return (*tree);
-}
+	root = binary_tree_node(root, array[middle]);
 
-/**
- * avl_insert - inserts a node into AVL tree
- * @tree: double pointer to root of tree
- * @value: value to insert into tree
- *
- * Return: pointer to new node or NULL if fail
- */
-avl_t *avl_insert(avl_t **tree, int value)
-{
-	if (tree == NULL)
-		return (NULL);
-	if (*tree == NULL)
-	{
-		*tree = binary_tree_node(*tree, value);
-		return (*tree);
-	}
-	if ((*tree)->n > value)
-	{
-		if ((*tree)->left == NULL)
-		{
-			(*tree)->left = binary_tree_node(*tree, value);
-			return ((*tree)->left);
-		}
-		return (avl_insert(&((*tree)->left), value));
-	}
-	if ((*tree)->n < value)
-	{
-		if ((*tree)->right == NULL)
-		{
-			(*tree)->right = binary_tree_node(*tree, value);
-			return ((*tree)->right);
-		}
-		return (avl_insert(&((*tree)->right), value));
-	}
-	return (NULL);
+	create_tree(&root, array, middle, 1);
+	create_tree(&root, array + middle + 1, (size - 1 - middle), 2);
+
+	return (root);
 }
